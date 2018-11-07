@@ -1,10 +1,10 @@
-module Float3 exposing (..)
+module Float3 exposing (add, directionFromTo, distance, distanceSquared, dot, f2, lengthSquared, normalize, scale)
 
+import Expect
 import Fuzz exposing (..)
 import Helper exposing (..)
-import Test exposing (..)
-import Expect
 import Math.Vector3 as Ref
+import Test exposing (..)
 import Vector3 as V
 
 

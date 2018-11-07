@@ -1,8 +1,8 @@
-module Float2 exposing (..)
+module Float2 exposing (add, directionFromTo, distance, distanceSquared, dot, f2, lengthSquared, normalize, scale)
 
 import Helper exposing (..)
-import Test exposing (..)
 import Math.Vector2 as Ref
+import Test exposing (..)
 import Vector2 as V
 
 

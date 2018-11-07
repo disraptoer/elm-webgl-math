@@ -1,15 +1,15 @@
-module Helper exposing (..)
+module Helper exposing (expectAlmostEqual, expectAlmostEqualErr, expectAlmostEqualM4, expectAlmostEqualV2, expectAlmostEqualV2Err, expectAlmostEqualV3, expectAlmostEqualV3Err, expectAlmostEqualV4, expectAlmostEqualV4Err, m4, m4affine, m4rigidBody, mkAlmostEqFn, smallFloat, smallNonZeroFloat, v2, v3, v3NonZero, v4)
 
+import Expect
+import Fuzz exposing (Fuzzer)
+import Math.Matrix4 as RefM4
 import Math.Vector2 as Ref2
 import Math.Vector3 as Ref3 exposing (vec3)
 import Math.Vector4 as Ref4
-import Math.Matrix4 as RefM4
+import Matrix4 as M4
 import Vector2 as V2
 import Vector3 as V3
 import Vector4 as V4
-import Matrix4 as M4
-import Fuzz exposing (Fuzzer)
-import Expect
 
 
 smallFloat =
@@ -21,6 +21,7 @@ smallNonZeroFloat =
         (\x y isX ->
             if isX then
                 x
+
             else
                 y
         )
@@ -66,7 +67,7 @@ m4rigidBody =
 
 
 expectAlmostEqualErr =
-    mkAlmostEqFn (identity) (-) (identity)
+    mkAlmostEqFn identity (-) identity
 
 
 expectAlmostEqual : Float -> Float -> Expect.Expectation
@@ -104,17 +105,17 @@ mkAlmostEqFn len sub toTup e a b =
             -- elm-linear-algebra uses 32bit floats, that's why we get poor precision
             abs (len (sub a (toTup b)))
     in
-        Expect.true "" (err < e)
-            |> Expect.onFail ("expected almost equal, failed with error " ++ toString err)
+    Expect.true "" (err < e)
+        |> Expect.onFail ("expected almost equal, failed with error " ++ String.fromFloat err)
 
 
 expectAlmostEqualM4 a b =
     Expect.true "" (M4.almostEqual 0.0001 a b)
         |> Expect.onFail
             ("expected almost equal, failed with error "
-                ++ toString (M4.maxNorm (M4.sub a b))
+                ++ String.fromFloat (M4.maxNorm (M4.sub a b))
                 ++ "\n  a = "
-                ++ toString a
+                ++ String.fromFloat a
                 ++ "\n  b = "
-                ++ toString b
+                ++ String.fromFloat b
             )

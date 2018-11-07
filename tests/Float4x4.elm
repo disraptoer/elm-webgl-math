@@ -1,11 +1,12 @@
-module Float4x4 exposing (..)
+module Float4x4 exposing (add, ex1, ex2, inverseRigidBodyTransform, makeLookAt1, makeLookAt2, makeTransform, minus, mul, t, t2, transform, translate, transpose)
 
+import Expect
 import Fuzz exposing (..)
 import Helper exposing (..)
-import Test exposing (..)
-import Expect
 import Matrix4 as V
+import Test exposing (..)
 import Vector3 as V3
+
 
 
 -- We can't test this library the same way because we can't construct/destruct a Matrix4 by hand
@@ -68,7 +69,7 @@ inverseRigidBodyTransform =
         m4rigidBody
         "expect inverseRigidBodyTransform * the original transform to be identity"
         (\m4 ->
-            expectAlmostEqualM4 (V.mul (V.inverseRigidBodyTransform m4) m4) (V.identity)
+            expectAlmostEqualM4 (V.mul (V.inverseRigidBodyTransform m4) m4) V.identity
         )
 
 
