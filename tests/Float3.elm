@@ -9,7 +9,7 @@ import Vector3 as V
 
 
 f2 =
-    Ref.fromTuple
+    \( x, y, z ) -> Ref.vec3 x y z
 
 
 

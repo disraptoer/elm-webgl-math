@@ -7,7 +7,7 @@ import Vector2 as V
 
 
 f2 =
-    Ref.fromTuple
+    \( x, y ) -> Ref.vec2 x y
 
 
 

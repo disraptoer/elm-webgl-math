@@ -1,15 +1,11 @@
-module Helper exposing (expectAlmostEqual, expectAlmostEqualErr, expectAlmostEqualM4, expectAlmostEqualV2, expectAlmostEqualV2Err, expectAlmostEqualV3, expectAlmostEqualV3Err, expectAlmostEqualV4, expectAlmostEqualV4Err, m4, m4affine, m4rigidBody, mkAlmostEqFn, smallFloat, smallNonZeroFloat, v2, v3, v3NonZero, v4)
+module Helper exposing (expectAlmostEqual, expectAlmostEqualErr, expectAlmostEqualV2, expectAlmostEqualV2Err, expectAlmostEqualV3, expectAlmostEqualV3Err, smallFloat, smallNonZeroFloat, v2, v3, v3NonZero)
 
 import Expect
 import Fuzz exposing (Fuzzer)
-import Math.Matrix4 as RefM4
 import Math.Vector2 as Ref2
 import Math.Vector3 as Ref3 exposing (vec3)
-import Math.Vector4 as Ref4
-import Matrix4 as M4
 import Vector2 as V2
 import Vector3 as V3
-import Vector4 as V4
 
 
 smallFloat =
@@ -43,29 +39,6 @@ v3NonZero =
     Fuzz.map3 (\x y z -> ( x, y, z )) smallNonZeroFloat smallNonZeroFloat smallNonZeroFloat
 
 
-v4 =
-    Fuzz.map4 (\x y z w -> ( x, y, z, w )) smallFloat smallFloat smallFloat smallFloat
-
-
-m4 =
-    Fuzz.map4 (\a b c d -> ( a, b, c, d )) v4 v4 v4 v4
-
-
-m4affine =
-    Fuzz.map4 (\t s ro r -> M4.mul (M4.makeTranslate t) (M4.mul (M4.makeScale s) (M4.makeRotate r ro)))
-        v3
-        v3NonZero
-        v3NonZero
-        smallFloat
-
-
-m4rigidBody =
-    Fuzz.map3 (\t ro r -> M4.mul (M4.makeTranslate t) (M4.makeRotate r ro))
-        v3
-        v3NonZero
-        smallFloat
-
-
 expectAlmostEqualErr =
     mkAlmostEqFn identity (-) identity
 
@@ -83,20 +56,12 @@ expectAlmostEqualV3 =
     expectAlmostEqualV3Err 0.1
 
 
-expectAlmostEqualV4 =
-    expectAlmostEqualV4Err 0.1
-
-
 expectAlmostEqualV2Err =
-    mkAlmostEqFn V2.length V2.sub Ref2.toTuple
+    mkAlmostEqFn V2.length V2.sub (Ref2.toRecord >> (\i -> ( i.x, i.y )))
 
 
 expectAlmostEqualV3Err =
-    mkAlmostEqFn V3.length V3.sub Ref3.toTuple
-
-
-expectAlmostEqualV4Err =
-    mkAlmostEqFn V4.length V4.sub Ref4.toTuple
+    mkAlmostEqFn V3.length V3.sub (Ref3.toRecord >> (\i -> ( i.x, i.y, i.z )))
 
 
 mkAlmostEqFn len sub toTup e a b =
@@ -107,15 +72,3 @@ mkAlmostEqFn len sub toTup e a b =
     in
     Expect.true "" (err < e)
         |> Expect.onFail ("expected almost equal, failed with error " ++ String.fromFloat err)
-
-
-expectAlmostEqualM4 a b =
-    Expect.true "" (M4.almostEqual 0.0001 a b)
-        |> Expect.onFail
-            ("expected almost equal, failed with error "
-                ++ String.fromFloat (M4.maxNorm (M4.sub a b))
-                ++ "\n  a = "
-                ++ String.fromFloat a
-                ++ "\n  b = "
-                ++ String.fromFloat b
-            )
