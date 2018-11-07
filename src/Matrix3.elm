@@ -1,4 +1,9 @@
-module Matrix3 exposing (..)
+module Matrix3 exposing
+    ( Mat3, Float3x3
+    , map, map2
+    , identity, add, sub, mul, mulVector, transpose, elementWiseMul
+    , transform
+    )
 
 {-|
 
@@ -18,8 +23,8 @@ Currently it's missing 2D transformation functions.
 
 -}
 
-import Vector3 as V3 exposing (Float3, Vec3)
 import Vector2 as V2 exposing (Float2, Vec2)
+import Vector3 as V3 exposing (Float3, Vec3)
 
 
 {-| -}
@@ -129,4 +134,4 @@ transform m ( x, y ) =
         ( u, v, w ) =
             mulVector m ( x, y, 1 )
     in
-        ( u / w, v / w )
+    ( u / w, v / w )

@@ -1,4 +1,16 @@
-module Matrix4 exposing (..)
+module Matrix4 exposing
+    ( Float4x4, Mat4
+    , map, map2, foldl, foldr
+    , identity, fromRows, fromColumns
+    , add, sub, mul, elementWiseMul, mulByConst, transpose, mulVector
+    , transform
+    , makeRotate, makeScale, makeTranslate, makeTransform
+    , rotate, scale, translate, transformBy
+    , makeLookAt, makeBasis
+    , transformAffine, mulAffine, inverseRigidBodyTransform
+    , makeFrustum, makePerspective, makeOrtho, makeOrtho2d
+    , maxNorm, almostEqual
+    )
 
 {-|
 
@@ -45,7 +57,7 @@ then transform the result back to normal coordinates.
 These transformations can be chained, e.g. you can apply several transformations in series.
 Note that to understand how a vector will be transformed, it helps to read it backwards:
 
-    T*R*S*v
+    T * R * S * v
 
 Means that `v` will be scaled by the matrix `S`, then rotated by `R` and finally translated by `T`.
 
@@ -98,8 +110,9 @@ Math heavy reference: <http://www.songho.ca/opengl/gl_projectionmatrix.html>
 
 -}
 
-import Vector4 as V4 exposing (Float4, Vec4)
 import Vector3 as V3 exposing (Float3, Vec3)
+import Vector4 as V4 exposing (Float4, Vec4)
+
 
 
 -- Useful references:
@@ -138,7 +151,7 @@ map2 f =
 {-| -}
 foldl : (elem -> acc -> acc) -> acc -> Mat4 elem -> acc
 foldl f init ( m1, m2, m3, m4 ) =
-    (V4.foldl f (V4.foldl f (V4.foldl f (V4.foldl f init m1) m2) m3) m4)
+    V4.foldl f (V4.foldl f (V4.foldl f (V4.foldl f init m1) m2) m3) m4
 
 
 {-| -}
@@ -170,7 +183,8 @@ identity =
 
 {-|
 
-    fromRows a b c d == (a,b,c,d)
+    fromRows a b c d == ( a, b, c, d )
+
 -}
 fromRows : Float4 -> Float4 -> Float4 -> Float4 -> Float4x4
 fromRows a b c d =
@@ -179,7 +193,8 @@ fromRows a b c d =
 
 {-|
 
-    fromColumns a b c d == transpose (a,b,c,d)
+    fromColumns a b c d == transpose ( a, b, c, d )
+
 -}
 fromColumns : Float4 -> Float4 -> Float4 -> Float4 -> Float4x4
 fromColumns a b c d =
@@ -299,10 +314,11 @@ transform ( ( a11, a12, a13, a14 ), ( a21, a22, a23, a24 ), ( a31, a32, a33, a34
             , a41 * x + a42 * y + a43 * z + a44
             )
     in
-        if w /= 1.0 then
-            ( r0 / w, r1 / w, r2 / w )
-        else
-            ( r0, r1, r2 )
+    if w /= 1.0 then
+        ( r0 / w, r1 / w, r2 / w )
+
+    else
+        ( r0, r1, r2 )
 
 
 
@@ -335,11 +351,11 @@ makeRotate angle axis =
         ( xyc1, xzc1, yzc1 ) =
             ( y * xc1, z * xc1, z * yc1 )
     in
-        ( ( x * xc1 + c, xyc1 - zs, xzc1 + ys, 0 )
-        , ( xyc1 + zs, y * yc1 + c, yzc1 - xs, 0 )
-        , ( xzc1 - ys, yzc1 + xs, z * z * c1 + c, 0 )
-        , ( 0, 0, 0, 1 )
-        )
+    ( ( x * xc1 + c, xyc1 - zs, xzc1 + ys, 0 )
+    , ( xyc1 + zs, y * yc1 + c, yzc1 - xs, 0 )
+    , ( xzc1 - ys, yzc1 + xs, z * z * c1 + c, 0 )
+    , ( 0, 0, 0, 1 )
+    )
 
 
 {-| Rotate an affine transform by an angle along the given axis.
@@ -357,9 +373,10 @@ rotate angle (( a0, a1, a2 ) as axis) ( ( m11, m12, m13, m14 ), ( m21, m22, m23,
             if l_2 /= 1.0 then
                 let
                     l_1 =
-                        1 / (sqrt l_2)
+                        1 / sqrt l_2
                 in
-                    ( a0 * l_1, a1 * l_1, a2 * l_1 )
+                ( a0 * l_1, a1 * l_1, a2 * l_1 )
+
             else
                 ( a0, a1, a2 )
 
@@ -381,23 +398,23 @@ rotate angle (( a0, a1, a2 ) as axis) ( ( m11, m12, m13, m14 ), ( m21, m22, m23,
             , ( xzc1 - ys, yzc1 + xs, z * z * c1 + c )
             )
     in
-        ( ( t11 * m11 + t21 * m12 + t31 * m13
-          , t12 * m11 + t22 * m12 + t32 * m13
-          , t13 * m11 + t23 * m12 + t33 * m13
-          , m14
-          )
-        , ( t11 * m21 + t21 * m22 + t31 * m23
-          , t12 * m21 + t22 * m22 + t32 * m23
-          , t13 * m21 + t23 * m22 + t33 * m23
-          , m24
-          )
-        , ( t11 * m31 + t21 * m32 + t31 * m33
-          , t12 * m31 + t22 * m32 + t32 * m33
-          , t13 * m31 + t23 * m32 + t33 * m33
-          , m34
-          )
-        , m4
-        )
+    ( ( t11 * m11 + t21 * m12 + t31 * m13
+      , t12 * m11 + t22 * m12 + t32 * m13
+      , t13 * m11 + t23 * m12 + t33 * m13
+      , m14
+      )
+    , ( t11 * m21 + t21 * m22 + t31 * m23
+      , t12 * m21 + t22 * m22 + t32 * m23
+      , t13 * m21 + t23 * m22 + t33 * m23
+      , m24
+      )
+    , ( t11 * m31 + t21 * m32 + t31 * m33
+      , t12 * m31 + t22 * m32 + t32 * m33
+      , t13 * m31 + t23 * m32 + t33 * m33
+      , m34
+      )
+    , m4
+    )
 
 
 {-| Create a scale matrix `S`.
@@ -451,7 +468,7 @@ Make sure xAxis yAxis zAxis are really orthonormal,
 otherwise you won't get an affine transform!
 Only use this if you know what you are doing.
 
-    makeBasis (1, 0, 0) (0, 1, 0) (0, 0, 1) == identity
+    makeBasis ( 1, 0, 0 ) ( 0, 1, 0 ) ( 0, 0, 1 ) == identity
 
 -}
 makeBasis : Float3 -> Float3 -> Float3 -> Float4x4
@@ -467,7 +484,7 @@ makeBasis ( ax, ay, az ) ( bx, by, bz ) ( cx, cy, cz ) =
 Very often used with cameras to make them look at a target.
 The up vector is usually (0, 1, 0), e.g. the y-axis. (some people also use the z-axis)
 
-    makeLookAt cameraPosition target (0, 1, 0)
+    makeLookAt cameraPosition target ( 0, 1, 0 )
 
 NaN warning: if cameraPosition = target
 
@@ -506,11 +523,11 @@ makeLookAt eye target up =
         (( y0, y1, y2 ) as y) =
             V3.normalize (V3.cross z x)
     in
-        ( ( x0, x1, x2, -(V3.dot x eye) )
-        , ( y0, y1, y2, -(V3.dot y eye) )
-        , ( z0, z1, z2, -(V3.dot z eye) )
-        , ( 0, 0, 0, 1 )
-        )
+    ( ( x0, x1, x2, -(V3.dot x eye) )
+    , ( y0, y1, y2, -(V3.dot y eye) )
+    , ( z0, z1, z2, -(V3.dot z eye) )
+    , ( 0, 0, 0, 1 )
+    )
 
 
 {-| Creates an affine transform given a translation, a scale, a rotation and a pivot vector.
@@ -558,11 +575,11 @@ makeTransform ( tx, ty, tz ) ( sx, sy, sz ) angle axis ( px, py, pz ) =
         ( new_z1, new_z2, new_z3 ) =
             ( sz * (rzxc1 + rys), sz * (rzyc1 - rxs), sz * (rz * rz * c1 + c) )
     in
-        ( ( new_x1, new_y1, new_z1, -px * new_x1 - py * new_y1 - pz * new_z1 + tx )
-        , ( new_x2, new_y2, new_z2, -px * new_x2 - py * new_y2 - pz * new_z2 + ty )
-        , ( new_x3, new_y3, new_z3, -px * new_x3 - py * new_y3 - pz * new_z3 + tz )
-        , ( 0, 0, 0, 1 )
-        )
+    ( ( new_x1, new_y1, new_z1, -px * new_x1 - py * new_y1 - pz * new_z1 + tx )
+    , ( new_x2, new_y2, new_z2, -px * new_x2 - py * new_y2 - pz * new_z2 + ty )
+    , ( new_x3, new_y3, new_z3, -px * new_x3 - py * new_y3 - pz * new_z3 + tz )
+    , ( 0, 0, 0, 1 )
+    )
 
 
 
@@ -641,8 +658,9 @@ rotations and translations.
 
 It's usually easier and faster to just do the construction of the matrix you want to invert in reverse, e.g.
 
-    inverseRigidBodyTransform (makeRotate 1.2 (0,1,0)) == makeRotate -1.2 (0,1,0)
-    inverseRigidBodyTransform (makeScale (2,3,1)) == makeScale (1/2,1/3,1)
+    inverseRigidBodyTransform (makeRotate 1.2 ( 0, 1, 0 )) == makeRotate -1.2 ( 0, 1, 0 )
+
+    inverseRigidBodyTransform (makeScale ( 2, 3, 1 )) == makeScale ( 1 / 2, 1 / 3, 1 )
 
 -}
 inverseRigidBodyTransform : Float4x4 -> Float4x4
@@ -676,11 +694,11 @@ makeFrustum left right bottom top znear zfar =
         ( r_l, t_b, zf_zn, zn_2 ) =
             ( right - left, top - bottom, zfar - znear, 2 * znear )
     in
-        ( ( zn_2 / r_l, 0, (right + left) / r_l, 0 )
-        , ( 0, zn_2 / t_b, (top + bottom) / t_b, 0 )
-        , ( 0, 0, -(zfar + znear) / zf_zn, -zn_2 * zfar / zf_zn )
-        , ( 0, 0, -1, 0 )
-        )
+    ( ( zn_2 / r_l, 0, (right + left) / r_l, 0 )
+    , ( 0, zn_2 / t_b, (top + bottom) / t_b, 0 )
+    , ( 0, 0, -(zfar + znear) / zf_zn, -zn_2 * zfar / zf_zn )
+    , ( 0, 0, -1, 0 )
+    )
 
 
 {-| Creates a matrix for a perspective projection.
@@ -692,7 +710,7 @@ aspect - aspect ratio
 znear - the near z distance of the projection
 zfar - the far z distance of the projection
 
-NaN warning: if znear = zfar or fovy = 720+n*1440
+NaN warning: if znear = zfar or fovy = 720+n\*1440
 
 -}
 makePerspective : Float -> Float -> Float -> Float -> Float4x4
@@ -707,7 +725,7 @@ makePerspective fovy aspect znear zfar =
         ( xmin, xmax ) =
             ( ymin * aspect, ymax * aspect )
     in
-        makeFrustum xmin xmax ymin ymax znear zfar
+    makeFrustum xmin xmax ymin ymax znear zfar
 
 
 {-| This creates an orthographic projection.
@@ -723,11 +741,11 @@ makeOrtho left right bottom top znear zfar =
         ( r_l, t_b, zf_zn ) =
             ( right - left, top - bottom, zfar - znear )
     in
-        ( ( 2 / r_l, 0, 0, -(right + left) / r_l )
-        , ( 0, 2 / t_b, 0, -(top + bottom) / t_b )
-        , ( 0, 0, -2 / zf_zn, -(zfar + znear) / zf_zn )
-        , ( 0, 0, 0, 1 )
-        )
+    ( ( 2 / r_l, 0, 0, -(right + left) / r_l )
+    , ( 0, 2 / t_b, 0, -(top + bottom) / t_b )
+    , ( 0, 0, -2 / zf_zn, -(zfar + znear) / zf_zn )
+    , ( 0, 0, 0, 1 )
+    )
 
 
 {-| Same as `makeOrtho`, but with `znear = -1` and `zfar = 1` set.

@@ -1,4 +1,9 @@
-module Vector3 exposing (..)
+module Vector3 exposing
+    ( Float3, Vec3
+    , fromV2, setX, setY, setZ, getX, getY, getZ, map, map2, foldl, foldr
+    , add, sub, negate, scale, divideBy
+    , dot, cross, length, lengthSquared, normalize, directionFromTo, distance, distanceSquared, angle, project, reject
+    )
 
 {-|
 
@@ -34,7 +39,8 @@ type alias Float3 =
 
 {-|
 
-    fromV2 (1,2) 3 == (1,2,3)
+    fromV2 ( 1, 2 ) 3 == ( 1, 2, 3 )
+
 -}
 fromV2 : Vec2 a -> a -> Vec3 a
 fromV2 ( x, y ) z =
@@ -79,7 +85,8 @@ setZ a ( x, y, z ) =
 
 {-|
 
-    map sqrt (1,4,9) == (1,2,3)
+    map sqrt ( 1, 4, 9 ) == ( 1, 2, 3 )
+
 -}
 map : (a -> b) -> Vec3 a -> Vec3 b
 map f ( x, y, z ) =
@@ -88,7 +95,8 @@ map f ( x, y, z ) =
 
 {-|
 
-    map2 (/) (4,9,12) (2,3,4) == (2,3,3)
+    map2 (/) ( 4, 9, 12 ) ( 2, 3, 4 ) == ( 2, 3, 3 )
+
 -}
 map2 : (a -> b -> c) -> Vec3 a -> Vec3 b -> Vec3 c
 map2 f ( x1, y1, z1 ) ( x2, y2, z2 ) =
@@ -97,7 +105,8 @@ map2 f ( x1, y1, z1 ) ( x2, y2, z2 ) =
 
 {-|
 
-    foldl (*) 1 (2,4,1) == 8
+    foldl (*) 1 ( 2, 4, 1 ) == 8
+
 -}
 foldl : (elem -> acc -> acc) -> acc -> Vec3 elem -> acc
 foldl f start ( x, y, z ) =
@@ -106,7 +115,8 @@ foldl f start ( x, y, z ) =
 
 {-|
 
-    foldr max 0 (1,12,-5) == 12
+    foldr max 0 ( 1, 12, -5 ) == 12
+
 -}
 foldr : (elem -> acc -> acc) -> acc -> Vec3 elem -> acc
 foldr f start ( x, y, z ) =
@@ -119,7 +129,7 @@ foldr f start ( x, y, z ) =
 
 {-| `v + w`
 
-    add (2,4,1) (3,-6,2) == (5,-2,3)
+    add ( 2, 4, 1 ) ( 3, -6, 2 ) == ( 5, -2, 3 )
 
 -}
 add : Float3 -> Float3 -> Float3
@@ -129,7 +139,7 @@ add ( x1, y1, z1 ) ( x2, y2, z2 ) =
 
 {-| `v - w`
 
-    sub (4,6,1) (3,-1,-4) == (1,7,5)
+    sub ( 4, 6, 1 ) ( 3, -1, -4 ) == ( 1, 7, 5 )
 
 -}
 sub : Float3 -> Float3 -> Float3
@@ -139,7 +149,7 @@ sub ( x1, y1, z1 ) ( x2, y2, z2 ) =
 
 {-| `-v`
 
-    negate (2,-1,5) == (-2,1,-5)
+    negate ( 2, -1, 5 ) == ( -2, 1, -5 )
 
 -}
 negate : Float3 -> Float3
@@ -149,7 +159,7 @@ negate ( x, y, z ) =
 
 {-| `a*v`
 
-    scale (1/2) (4,2,6) == (2,1,3)
+    scale (1 / 2) ( 4, 2, 6 ) == ( 2, 1, 3 )
 
 -}
 scale : Float -> Float3 -> Float3
@@ -159,7 +169,7 @@ scale a ( x, y, z ) =
 
 {-| `v/a`
 
-    divideBy (1/2) (2,1,3) == (4,2,6)
+    divideBy (1 / 2) ( 2, 1, 3 ) == ( 4, 2, 6 )
 
 NaN/infinity warning: if a = 0
 
@@ -177,7 +187,7 @@ It links the length and angle of two vectors.
 
 `v dot w = |v|*|w|*cos(phi)`
 
-    dot (1,2,2) (3,3,2) == 1*3 + 2*3 + 2*2 == 13
+    dot ( 1, 2, 2 ) ( 3, 3, 2 ) == 1 * 3 + 2 * 3 + 2 * 2 == 13
 
 -}
 dot : Float3 -> Float3 -> Float
@@ -196,7 +206,7 @@ The length of `v cross w` is equal to the area of the parallelogram spanned by `
 
 `|v cross w| = |v|*|w|*sin(phi)`
 
-    cross (2,1,3) (4,5,-3) == (1*(-3) - 3*5, 3*4 - 2*(-3), 2*5 - 1*4) == (-18, 18, 6)
+    cross ( 2, 1, 3 ) ( 4, 5, -3 ) == ( 1 * -3 - 3 * 5, 3 * 4 - 2 * -3, 2 * 5 - 1 * 4 ) == ( -18, 18, 6 )
 
 -}
 cross : Float3 -> Float3 -> Float3
@@ -208,7 +218,7 @@ cross ( x1, y1, z1 ) ( x2, y2, z2 ) =
 
 `|v| = sqrt(v dot v)`
 
-    length (4,2,4) == sqrt (4^2+2^2+4^2) == 6
+    length ( 4, 2, 4 ) == sqrt (4 ^ 2 + 2 ^ 2 + 4 ^ 2) == 6
 
 -}
 length : Float3 -> Float
@@ -221,7 +231,7 @@ so if you only need to compare lengths you can use this instead of the length.
 
 `|v|^2 = v dot w`
 
-    lengthSquared (3,4,1) == 3^2+4^2+1^2 == 26
+    lengthSquared ( 3, 4, 1 ) == 3 ^ 2 + 4 ^ 2 + 1 ^ 2 == 26
 
 -}
 lengthSquared : Float3 -> Float
@@ -233,7 +243,7 @@ lengthSquared v =
 
 `v/|v|`
 
-    normalize (4,2,4) == (2/3,1/3,2/3)
+    normalize ( 4, 2, 4 ) == ( 2 / 3, 1 / 3, 2 / 3 )
 
 NaN warning: if v = 0
 
@@ -247,7 +257,7 @@ normalize v =
 
 `(v dot w)/|w| * w/|w|`
 
-    project (2,1,0) (4,0,0) == (2,0,0)
+    project ( 2, 1, 0 ) ( 4, 0, 0 ) == ( 2, 0, 0 )
 
 NaN warning: if w = 0
 
@@ -258,14 +268,14 @@ project v w =
         l_w =
             lengthSquared w
     in
-        scale ((dot v w) / l_w) w
+    scale (dot v w / l_w) w
 
 
 {-| The rejection of `v` onto `w`. This is always perpendicular to the projection.
 
 `v - (project v w)`
 
-    reject (2,1,0) (4,0,0) == (0,1,0)
+    reject ( 2, 1, 0 ) ( 4, 0, 0 ) == ( 0, 1, 0 )
 
 NaN warning: if w = 0
 
@@ -279,7 +289,7 @@ reject v w =
 
 `(w - v)/|w - v|`
 
-    directionFromTo (5,1,2) (9,3,6) == (2/3,1/3,2/3)
+    directionFromTo ( 5, 1, 2 ) ( 9, 3, 6 ) == ( 2 / 3, 1 / 3, 2 / 3 )
 
 NaN warning: if v = w
 
@@ -293,7 +303,7 @@ directionFromTo a b =
 
 `|v - w| = |w - v|`
 
-    distance (2,0,4) (0,4,0) == 6
+    distance ( 2, 0, 4 ) ( 0, 4, 0 ) == 6
 
 -}
 distance : Float3 -> Float3 -> Float
@@ -305,7 +315,7 @@ distance a b =
 
 `|v - w|^2`
 
-    distanceSquared (3,0,2) (0,4,1) == 26
+    distanceSquared ( 3, 0, 2 ) ( 0, 4, 1 ) == 26
 
 -}
 distanceSquared : Float3 -> Float3 -> Float
@@ -317,7 +327,7 @@ distanceSquared a b =
 
 `acos((v dot w)/(|v|*|w|))`
 
-    angle (-1,-1,2) (2,2,2) == pi/2    -- or 90°
+    angle ( -1, -1, 2 ) ( 2, 2, 2 ) == pi / 2 -- or 90°
 
 NaN warning: if v = 0 or w = 0
 
@@ -328,7 +338,8 @@ angle a b =
         r =
             dot a b / (length a * length b)
     in
-        if r >= 1 then
-            0
-        else
-            acos r
+    if r >= 1 then
+        0
+
+    else
+        acos r

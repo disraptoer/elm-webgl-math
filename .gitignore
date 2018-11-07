@@ -1,2 +1,16 @@
-elm-stuff/
-documentation.json
+# Dependency directories
+node_modules/
+# elm-package generated files
+elm-stuff
+# elm-repl generated files
+repl-temp-*
+
+# General
+*.DS_Store
+package-lock.json
+
+#build artifacts
+dist/
+
+#editorstuff
+.vscode/

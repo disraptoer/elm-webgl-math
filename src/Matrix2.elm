@@ -1,4 +1,10 @@
-module Matrix2 exposing (..)
+module Matrix2 exposing
+    ( Float2x2, Mat2
+    , map, map2, foldl, foldr
+    , identity, fromRows, fromColumns
+    , add, sub, mul, elementWiseMul, mulByConst, transpose, mulVector
+    , almostEqual, maxNorm
+    )
 
 {-|
 
@@ -43,6 +49,7 @@ type alias Float2x2 =
 
     elementsSquared =
         map (\x -> x ^ 2)
+
 -}
 map : (a -> b) -> Mat2 a -> Mat2 b
 map f =
@@ -53,6 +60,7 @@ map f =
 
     elementWiseDivision =
         map2 (/)
+
 -}
 map2 : (a -> b -> c) -> Mat2 a -> Mat2 b -> Mat2 c
 map2 f =
@@ -92,7 +100,7 @@ identity =
 
 {-| Construct a matrix from rows.
 
-    fromRows (1,2) (3,4) == ((1,2),(3,4))
+    fromRows ( 1, 2 ) ( 3, 4 ) == ( ( 1, 2 ), ( 3, 4 ) )
 
 -}
 fromRows : Float2 -> Float2 -> Float2x2
@@ -102,7 +110,7 @@ fromRows a b =
 
 {-| Construct a matrix from columns.
 
-    fromColumns (1,2) (3,4) == ((1,3),(2,4))
+    fromColumns ( 1, 2 ) ( 3, 4 ) == ( ( 1, 3 ), ( 2, 4 ) )
 
 -}
 fromColumns : Float2 -> Float2 -> Float2x2
